@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robotic Arm Health Prediction System</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --accent: #238636;
+      --accent-hover: #2ea043;
+      --blue: #1f6feb;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --warn: #d29922;
+      --crit: #da3633;
+      --healthy: #3fb950;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header .logo { font-size: 2rem; }
+    header h1 { font-size: 1.5rem; font-weight: 700; }
+    header p  { color: var(--muted); font-size: 0.9rem; margin-top: 2px; }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 80px 24px 60px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .hero .badge {
+      display: inline-block;
+      background: rgba(31,111,235,0.15);
+      color: var(--blue);
+      border: 1px solid rgba(31,111,235,0.4);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 20px;
+    }
+    .hero h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 18px;
+    }
+    .hero h2 span { color: var(--blue); }
+    .hero p {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 620px;
+      margin: 0 auto 36px;
+    }
+    .btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.15s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    /* ── SECTION ── */
+    section { max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 32px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── STATUS CARDS ── */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 60px;
+    }
+    .status-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .status-card .dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .dot-healthy { background: var(--healthy); box-shadow: 0 0 8px var(--healthy); }
+    .dot-warn    { background: var(--warn);    box-shadow: 0 0 8px var(--warn); }
+    .dot-crit    { background: var(--crit);    box-shadow: 0 0 8px var(--crit); }
+    .status-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .status-card p  { color: var(--muted); font-size: 0.85rem; }
+
+    /* ── FEATURE GRID ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+    }
+    .feature-card .icon { font-size: 1.8rem; margin-bottom: 12px; }
+    .feature-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p  { color: var(--muted); font-size: 0.875rem; }
+
+    /* ── SENSOR METRICS ── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 60px;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .metric-card .label { color: var(--muted); font-size: 0.78rem; margin-bottom: 4px; }
+    .metric-card .value { font-size: 1.2rem; font-weight: 700; color: var(--blue); }
+    .metric-card .unit  { color: var(--muted); font-size: 0.75rem; }
+
+    /* ── TECH STACK ── */
+    .tech-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 60px;
+    }
+    .tech-tag {
+      background: rgba(31,111,235,0.12);
+      border: 1px solid rgba(31,111,235,0.3);
+      color: var(--blue);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    /* ── PIPELINE ── */
+    .pipeline {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0;
+      margin-bottom: 60px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .pipeline-step {
+      flex: 1;
+      min-width: 130px;
+      padding: 20px 16px;
+      text-align: center;
+      position: relative;
+    }
+    .pipeline-step:not(:last-child)::after {
+      content: "›";
+      position: absolute;
+      right: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 1.4rem;
+      z-index: 1;
+    }
+    .pipeline-step .step-icon { font-size: 1.5rem; margin-bottom: 6px; }
+    .pipeline-step .step-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .pipeline-step .step-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    footer a { color: var(--blue); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="logo">🤖</div>
+  <div>
+    <h1>Robotic Arm Health Prediction System</h1>
+    <p>AI-powered predictive maintenance for industrial robotic arms</p>
+  </div>
+</header>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="badge">Machine Learning · Predictive Maintenance</div>
+  <h2>Detect failures <span>before</span> they happen</h2>
+  <p>
+    A real-time health monitoring platform that uses a Random Forest classifier
+    to predict robotic arm failure risk from live sensor telemetry — enabling
+    proactive maintenance and minimising unplanned downtime.
+  </p>
+  <div class="btn-group">
+    <a href="https://github.com" class="btn btn-primary" id="app-link">
+      ▶ Launch App
+    </a>
+    <a href="https://github.com" class="btn btn-secondary" id="repo-link">
+      ⬡ View Repository
+    </a>
+  </div>
+</div>
+
+<!-- ── MAIN CONTENT ── -->
+<section>
+
+  <!-- Health Status Legend -->
+  <div class="section-title">Health Status Levels</div>
+  <div class="status-grid">
+    <div class="status-card">
+      <div class="dot dot-healthy"></div>
+      <h3 style="color:var(--healthy)">Healthy — Optimal</h3>
+      <p>Failure probability &lt; 50%. All sensor readings within normal operating range.</p>
+    </div>
+    <div class="status-card">
+      <div class="dot dot-warn"></div>
+      <h3 style="color:var(--warn)">Warning — Maintenance Needed</h3>
+      <p>Failure probability 50–79%. Schedule preventive maintenance soon.</p>
+    </div>
+    <div class="status-card">
+      <div class="dot dot-crit"></div>
+      <h3 style="color:var(--crit)">Critical — Immediate Action</h3>
+      <p>Failure probability ≥ 80%. Immediate intervention required to prevent breakdown.</p>
+    </div>
+  </div>
+
+  <!-- Monitored Sensors -->
+  <div class="section-title">Monitored Sensor Parameters</div>
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="label">Temperature</div>
+      <div class="value">°C</div>
+      <div class="unit">Thermal load</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Vibration</div>
+      <div class="value">Hz</div>
+      <div class="unit">Mechanical wear</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Torque</div>
+      <div class="value">Nm</div>
+      <div class="unit">Drive stress</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Pressure</div>
+      <div class="value">Bar</div>
+      <div class="unit">Hydraulic load</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Voltage</div>
+      <div class="value">V</div>
+      <div class="unit">Electrical health</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Rotation</div>
+      <div class="value">RPM</div>
+      <div class="unit">Motor speed</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Age</div>
+      <div class="value">Days</div>
+      <div class="unit">Asset age</div>
+    </div>
+  </div>
+
+  <!-- ML Pipeline -->
+  <div class="section-title">ML Pipeline</div>
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-icon">📥</div>
+      <div class="step-label">Raw Data</div>
+      <div class="step-sub">CSV sensor logs</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-icon">🧹</div>
+      <div class="step-label">Preprocessing</div>
+      <div class="step-sub">Clean &amp; normalise</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-icon">🏷️</div>
+      <div class="step-label">Risk Labelling</div>
+      <div class="step-sub">0 · 1 · 2</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-icon">⚖️</div>
+      <div class="step-label">StandardScaler</div>
+      <div class="step-sub">Feature scaling</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-icon">🌲</div>
+      <div class="step-label">Random Forest</div>
+      <div class="step-sub">Classifier</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-icon">📊</div>
+      <div class="step-label">Evaluation</div>
+      <div class="step-sub">CM · F1 · Accuracy</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-icon">🖥️</div>
+      <div class="step-label">Streamlit UI</div>
+      <div class="step-sub">Live dashboard</div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="section-title">Key Features</div>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon">🔍</div>
+      <h3>Real-time Diagnostics</h3>
+      <p>Select any robotic arm by ID from historical data or simulate any sensor parameter combination via the manual mode slider panel.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🌲</div>
+      <h3>Random Forest Classifier</h3>
+      <p>Multi-class classification (Healthy / Warning / Critical) trained on sensor telemetry with cross-validation and fit-diagnosis reporting.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📉</div>
+      <h3>Confusion Matrix & Reports</h3>
+      <p>Interactive heatmap confusion matrix and per-class precision, recall, and F1-score classification report rendered inside the dashboard.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">⚠️</div>
+      <h3>Failure Probability Score</h3>
+      <p>Displays a 0–100 % failure probability gauge combining Warning and Critical class probabilities from the model's predict_proba output.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📜</div>
+      <h3>Historical Data Explorer</h3>
+      <p>Drill into the full sensor history for any selected robotic arm ID, sorted chronologically for trend analysis.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">💾</div>
+      <h3>Persisted Artifacts</h3>
+      <p>Trained model and scaler are serialised with joblib so the Streamlit app loads instantly without retraining on every run.</p>
+    </div>
+  </div>
+
+  <!-- Tech Stack -->
+  <div class="section-title" style="margin-top:60px;">Technology Stack</div>
+  <div class="tech-list">
+    <span class="tech-tag">Python 3</span>
+    <span class="tech-tag">Streamlit</span>
+    <span class="tech-tag">scikit-learn</span>
+    <span class="tech-tag">Random Forest</span>
+    <span class="tech-tag">pandas</span>
+    <span class="tech-tag">NumPy</span>
+    <span class="tech-tag">StandardScaler</span>
+    <span class="tech-tag">joblib</span>
+    <span class="tech-tag">Matplotlib</span>
+    <span class="tech-tag">Seaborn</span>
+    <span class="tech-tag">GitHub Pages</span>
+  </div>
+
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <p>Built for the Learnthon project showcase &nbsp;·&nbsp; 2026</p>
+  <p style="margin-top:6px;">
+    Deployed with
+    <a href="https://pages.github.com/">GitHub Pages</a>
+    &nbsp;·&nbsp;
+    App powered by
+    <a href="https://streamlit.io/">Streamlit</a>
+  </p>
+</footer>
+
+</body>
+</html>
