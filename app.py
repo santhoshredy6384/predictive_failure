@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
+
 import streamlit as st
 import pandas as pd
 import joblib

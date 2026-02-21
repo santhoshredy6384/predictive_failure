@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
+
 import pandas as pd
 import numpy as np
 from datetime import datetime
