@@ -20,125 +20,314 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-# GLOBAL CSS
+# GLOBAL CSS  (vibrant · interactive · minimal)
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
-/* ── base ── */
-[data-testid="stAppViewContainer"] { background: #0b0f19; }
-[data-testid="stSidebar"]          { background: #10151f; border-right: 1px solid #1e2535; }
-[data-testid="stHeader"]           { background: transparent; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
-/* ── hide default streamlit chrome ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── keyframes ── */
+@keyframes glow-pulse {
+  0%,100% { box-shadow: 0 0 0px 0px var(--glow); }
+  50%      { box-shadow: 0 0 14px 3px var(--glow); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes ripple {
+  0%   { transform: scale(1);   opacity:.7; }
+  100% { transform: scale(2.4); opacity:0;  }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes status-pulse {
+  0%,100% { opacity:1; }
+  50%      { opacity:.45; }
+}
+
+/* ── base ── */
+[data-testid="stAppViewContainer"] {
+    background: #07090f;
+    font-family: 'Inter', sans-serif;
+}
+[data-testid="stSidebar"] {
+    background: #0d1117;
+    border-right: 1px solid #161d2a;
+}
+[data-testid="stHeader"] { background: transparent; }
 #MainMenu, footer, header { visibility: hidden; }
 
-/* ── top nav bar ── */
+/* ── TOP NAV ── */
 .topbar {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 28px; background: #10151f;
-    border-bottom: 1px solid #1e2535; margin-bottom: 24px;
-    border-radius: 0 0 12px 12px;
+    padding: 16px 32px;
+    background: linear-gradient(90deg, #0d1117 0%, #111827 100%);
+    border-bottom: 1px solid #1a2235;
+    margin-bottom: 28px;
+    border-radius: 0 0 16px 16px;
+    animation: fadeUp .5s ease both;
 }
-.topbar-left { display: flex; align-items: center; gap: 12px; }
-.topbar-logo { font-size: 1.7rem; }
-.topbar-title { font-size: 1.1rem; font-weight: 800; color: #e2e8f0; letter-spacing: .02em; }
-.topbar-sub   { font-size: 0.75rem; color: #64748b; margin-top: 1px; }
-.topbar-badge {
-    background: rgba(99,102,241,.15); color: #818cf8;
-    border: 1px solid rgba(99,102,241,.35);
-    border-radius: 20px; padding: 3px 12px; font-size: 0.72rem; font-weight: 600;
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+.topbar-icon-wrap {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg,#6366f1,#8b5cf6);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.35rem;
+    box-shadow: 0 0 18px rgba(139,92,246,.45);
+}
+.topbar-title { font-size: 1.05rem; font-weight: 800; color: #f1f5f9; letter-spacing:.01em; }
+.topbar-sub   { font-size: 0.73rem; color: #4b5563; margin-top: 1px; }
+.topbar-pill {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(99,102,241,.1);
+    border: 1px solid rgba(99,102,241,.3);
+    border-radius: 999px; padding: 5px 16px;
+    font-size: 0.72rem; font-weight: 700; color: #818cf8;
+    letter-spacing: .04em;
+}
+.live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #22c55e;
+    animation: status-pulse 1.8s infinite;
+    box-shadow: 0 0 6px #22c55e;
 }
 
-/* ── sidebar section heading ── */
+/* ── sidebar heading ── */
 .sb-head {
-    font-size: .7rem; font-weight: 700; color: #475569;
-    letter-spacing: .1em; text-transform: uppercase;
-    margin: 18px 0 8px;
+    font-size: .66rem; font-weight: 700; color: #374151;
+    letter-spacing: .12em; text-transform: uppercase;
+    margin: 20px 0 8px; padding-left: 2px;
 }
 
-/* ── sensor card row ── */
+/* ── SENSOR CARDS ── */
 .sensor-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px; margin-bottom: 24px;
+    grid-template-columns: repeat(7,1fr);
+    gap: 10px; margin-bottom: 28px;
 }
-.sensor-card {
-    background: #10151f; border: 1px solid #1e2535;
-    border-radius: 10px; padding: 14px 10px;
-    text-align: center; position: relative; overflow: hidden;
+.sc {
+    --glow: #3b82f6;
+    background: #0d1117;
+    border: 1px solid #1a2235;
+    border-radius: 14px;
+    padding: 16px 8px 14px;
+    text-align: center;
+    cursor: default;
+    position: relative; overflow: hidden;
+    transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    animation: fadeUp .4s ease both;
 }
-.sensor-card::before {
-    content: ""; position: absolute; top: 0; left: 0; right: 0;
-    height: 3px; border-radius: 10px 10px 0 0;
+.sc:hover {
+    transform: translateY(-4px) scale(1.03);
+    border-color: var(--glow);
+    box-shadow: 0 0 22px -2px var(--glow), 0 8px 24px rgba(0,0,0,.4);
 }
-.sc-blue::before   { background: #3b82f6; }
-.sc-violet::before { background: #8b5cf6; }
-.sc-amber::before  { background: #f59e0b; }
-.sc-teal::before   { background: #14b8a6; }
-.sc-rose::before   { background: #f43f5e; }
-.sc-cyan::before   { background: #06b6d4; }
-.sc-green::before  { background: #22c55e; }
-.sensor-icon  { font-size: 1.3rem; margin-bottom: 4px; }
-.sensor-label { font-size: .68rem; color: #64748b; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
-.sensor-value { font-size: 1.25rem; font-weight: 800; color: #e2e8f0; line-height: 1; }
-.sensor-unit  { font-size: .65rem; color: #475569; margin-top: 2px; }
+/* shimmer sweep on hover */
+.sc::after {
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(105deg,transparent 40%,rgba(255,255,255,.07) 50%,transparent 60%);
+    background-size: 200% 100%;
+    opacity:0; transition: opacity .2s;
+}
+.sc:hover::after { opacity:1; animation: shimmer .7s ease; }
 
-/* ── result banner ── */
+/* colour variants */
+.sc-blue   { --glow:#3b82f6; }
+.sc-violet { --glow:#8b5cf6; }
+.sc-amber  { --glow:#f59e0b; }
+.sc-teal   { --glow:#14b8a6; }
+.sc-rose   { --glow:#f43f5e; }
+.sc-cyan   { --glow:#06b6d4; }
+.sc-green  { --glow:#22c55e; }
+
+/* coloured top accent bar */
+.sc::before {
+    content:""; position:absolute; top:0; left:0; right:0;
+    height:3px; border-radius:14px 14px 0 0;
+    background: var(--glow);
+}
+
+/* icon circle */
+.sc-icon-wrap {
+    width: 38px; height: 38px;
+    margin: 0 auto 8px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--glow) 15%, transparent);
+    border: 1.5px solid color-mix(in srgb, var(--glow) 35%, transparent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    transition: background .22s, box-shadow .22s;
+}
+.sc:hover .sc-icon-wrap {
+    background: color-mix(in srgb, var(--glow) 28%, transparent);
+    box-shadow: 0 0 12px var(--glow);
+}
+.sc-label {
+    font-size: .6rem; font-weight: 700; color: #4b5563;
+    letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px;
+}
+.sc-value {
+    font-size: 1.2rem; font-weight: 800;
+    color: color-mix(in srgb, var(--glow) 90%, #fff);
+    line-height: 1;
+    transition: color .22s;
+}
+.sc-unit { font-size: .62rem; color: #374151; margin-top: 2px; }
+
+/* ── RESULT BANNER ── */
 .result-banner {
-    border-radius: 12px; padding: 24px 32px;
-    text-align: center; margin-bottom: 20px;
+    border-radius: 16px; padding: 26px 36px;
+    text-align: center; margin-bottom: 22px;
     border: 1px solid;
+    position: relative; overflow: hidden;
+    animation: fadeUp .35s ease both;
 }
-.result-title { font-size: 1.6rem; font-weight: 800; margin: 0 0 4px; }
-.result-sub   { font-size: 1rem; color: #94a3b8; margin: 0; }
-
-/* ── prob bar ── */
-.prob-wrap { background: #1e2535; border-radius: 8px; height: 18px; overflow: hidden; margin: 10px 0; }
-.prob-fill  { height: 100%; border-radius: 8px; transition: width .6s ease; }
-
-/* ── stat card ── */
-.stat-row { display: flex; gap: 12px; margin-bottom: 20px; }
-.stat-card {
-    flex: 1; background: #10151f; border: 1px solid #1e2535;
-    border-radius: 10px; padding: 16px; text-align: center;
+.result-banner::before {
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(105deg,transparent 35%,rgba(255,255,255,.04) 50%,transparent 65%);
+    background-size:200% 100%;
+    animation: shimmer 2.8s ease infinite;
 }
-.stat-card .sv { font-size: 1.5rem; font-weight: 800; color: #818cf8; }
-.stat-card .sl { font-size: .75rem; color: #64748b; margin-top: 2px; font-weight: 600; }
+.result-title { font-size: 1.55rem; font-weight: 800; margin:0 0 4px; letter-spacing:-.01em; }
+.result-sub   { font-size: .95rem; color: #6b7280; margin:0; }
 
-/* ── section header ── */
+/* ── PROB BAR ── */
+.prob-wrap {
+    background: #111827; border-radius: 999px;
+    height: 10px; overflow: hidden; margin: 12px 0 4px;
+    border: 1px solid #1a2235;
+}
+.prob-fill {
+    height: 100%; border-radius: 999px;
+    background: var(--bar-color);
+    box-shadow: 0 0 10px var(--bar-color);
+    position: relative; overflow: hidden;
+}
+.prob-fill::after {
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);
+    background-size:200% 100%;
+    animation: shimmer 1.8s ease infinite;
+}
+
+/* ── KPI CARD ── */
+.kpi-card {
+    background: #0d1117;
+    border: 1px solid #1a2235;
+    border-radius: 14px; padding: 20px 16px;
+    text-align: center;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+    animation: fadeUp .4s ease both;
+}
+.kpi-card:hover {
+    transform: translateY(-3px);
+    border-color: #6366f1;
+    box-shadow: 0 0 20px rgba(99,102,241,.2);
+}
+.kpi-val  { font-size: 1.6rem; font-weight: 800; color: #818cf8; line-height: 1; }
+.kpi-lbl  { font-size: .7rem; color: #4b5563; margin-top: 6px; font-weight: 600;
+            text-transform: uppercase; letter-spacing:.07em; }
+
+/* ── SECTION HEADING ── */
 .sec-head {
-    font-size: .72rem; font-weight: 700; color: #475569;
-    letter-spacing: .1em; text-transform: uppercase;
-    border-bottom: 1px solid #1e2535; padding-bottom: 8px;
-    margin: 28px 0 16px;
+    font-size: .68rem; font-weight: 700; color: #374151;
+    letter-spacing: .12em; text-transform: uppercase;
+    border-bottom: 1px solid #161d2a;
+    padding-bottom: 8px; margin: 28px 0 16px;
+    display: flex; align-items: center; gap: 8px;
+}
+.sec-head::before {
+    content:""; width:3px; height:13px;
+    border-radius:2px;
+    background: linear-gradient(180deg,#6366f1,#8b5cf6);
+    display: inline-block;
 }
 
-/* ── tab styling ── */
+/* ── TABS ── */
 [data-baseweb="tab-list"] {
-    background: #10151f !important;
-    border-radius: 10px; padding: 4px; gap: 4px;
-    border: 1px solid #1e2535;
+    background: #0d1117 !important;
+    border-radius: 12px; padding: 4px; gap: 3px;
+    border: 1px solid #161d2a;
 }
 [data-baseweb="tab"] {
-    border-radius: 8px !important; font-weight: 600 !important;
-    font-size: .85rem !important; color: #64748b !important;
-    padding: 8px 20px !important;
+    border-radius: 9px !important; font-weight: 600 !important;
+    font-size: .82rem !important; color: #4b5563 !important;
+    padding: 8px 22px !important;
+    transition: color .15s !important;
 }
 [aria-selected="true"][data-baseweb="tab"] {
-    background: #1e2b45 !important; color: #818cf8 !important;
+    background: linear-gradient(135deg,#1c2444,#1a1f36) !important;
+    color: #818cf8 !important;
+    box-shadow: 0 0 12px rgba(99,102,241,.18) !important;
 }
 
-/* ── dataframe dark ── */
-[data-testid="stDataFrame"] { border: 1px solid #1e2535; border-radius: 8px; }
-
-/* ── button ── */
+/* ── BUTTON ── */
 [data-testid="stButton"] > button {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: #fff; border: none; border-radius: 8px;
-    font-weight: 700; padding: 10px 28px; font-size: .9rem;
-    transition: opacity .2s;
+    background: linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
+    color: #fff; border: none; border-radius: 10px;
+    font-weight: 700; padding: 11px 32px; font-size: .88rem;
+    letter-spacing: .02em;
+    position: relative; overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+    box-shadow: 0 0 0 rgba(139,92,246,0);
 }
-[data-testid="stButton"] > button:hover { opacity: .85; }
+[data-testid="stButton"] > button::after {
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(105deg,transparent 35%,rgba(255,255,255,.18) 50%,transparent 65%);
+    background-size:200% 100%;
+    opacity:0; transition:opacity .2s;
+}
+[data-testid="stButton"] > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 26px rgba(139,92,246,.55);
+}
+[data-testid="stButton"] > button:hover::after {
+    opacity:1; animation: shimmer .65s ease;
+}
+
+/* ── BREAKDOWN ROWS ── */
+.bd-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 9px 14px; border-radius:9px; margin-bottom:8px;
+    background:#0d1117; border:1px solid #161d2a;
+    transition: border-color .2s, box-shadow .2s;
+}
+.bd-row:hover { border-color: var(--rc); box-shadow:0 0 10px color-mix(in srgb,var(--rc) 30%,transparent); }
+.bd-label { font-size:.82rem; color:#9ca3af; font-weight:600; }
+.bd-badge {
+    font-weight:800; font-size:.82rem;
+    color: var(--rc);
+    background: color-mix(in srgb, var(--rc) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--rc) 30%, transparent);
+    border-radius:6px; padding:2px 13px;
+}
+
+/* ── fleet sidebar card ── */
+.fleet-card {
+    background:#07090f; border:1px solid #161d2a;
+    border-radius:10px; padding:13px 15px;
+}
+.fleet-row {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:7px;
+}
+.fleet-row:last-child { margin-bottom:0; }
+.fleet-lbl { color:#4b5563; font-size:.76rem; }
+.fleet-val { color:#818cf8; font-weight:700; font-size:.9rem; }
+
+/* ── dataframe ── */
+[data-testid="stDataFrame"] { border:1px solid #161d2a; border-radius:10px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -148,13 +337,16 @@ st.markdown("""
 st.markdown("""
 <div class="topbar">
   <div class="topbar-left">
-    <div class="topbar-logo">🦾</div>
+    <div class="topbar-icon-wrap">🦾</div>
     <div>
       <div class="topbar-title">PredictMaint</div>
       <div class="topbar-sub">Robotic Arm Health Prediction System</div>
     </div>
   </div>
-  <div class="topbar-badge">Random Forest · AI Diagnostics</div>
+  <div class="topbar-pill">
+    <div class="live-dot"></div>
+    RANDOM FOREST · AI DIAGNOSTICS
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -227,11 +419,11 @@ FEATURES = ["temperature","vibration","torque","pressure","volt","rotate","age_d
 # SIDEBAR
 # ─────────────────────────────────────────────
 with st.sidebar:
-    st.markdown('<div class="sb-head">Input Mode</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-head">⬡ Input Mode</div>', unsafe_allow_html=True)
     input_mode = st.radio("Input Mode", ["Select Robot ID", "Manual Simulation"],
                           label_visibility="collapsed")
 
-    st.markdown('<div class="sb-head">Robot Configuration</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-head">⬡ Robot Configuration</div>', unsafe_allow_html=True)
 
     selected_row = None
     arm_id       = None
@@ -246,7 +438,7 @@ with st.sidebar:
                             if "start_date" in arm_rows.columns
                             else arm_rows.iloc[-1])
     else:
-        st.markdown('<div class="sb-head">Sensor Parameters</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sb-head">⬡ Sensor Parameters</div>', unsafe_allow_html=True)
         manual_input = {
             "temperature": st.slider("🌡 Temperature (°C)",   20.0,  100.0,  60.0),
             "vibration":   st.slider("📳 Vibration (Hz)",      0.0,  100.0,  30.0),
@@ -260,18 +452,18 @@ with st.sidebar:
         arm_id = "MANUAL-SIM"
 
     # ── fleet summary ──
-    st.markdown('<div class="sb-head">Fleet Overview</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-head">⬡ Fleet Overview</div>', unsafe_allow_html=True)
     total_arms = data["robotic_arm_id"].nunique() if "robotic_arm_id" in data.columns else "—"
     total_rows = len(data)
     st.markdown(f"""
-    <div style="background:#0b0f19;border:1px solid #1e2535;border-radius:8px;padding:12px 14px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-        <span style="color:#64748b;font-size:.78rem;">Total Arms</span>
-        <span style="color:#818cf8;font-weight:700;">{total_arms}</span>
+    <div class="fleet-card">
+      <div class="fleet-row">
+        <span class="fleet-lbl">🦾 Total Arms</span>
+        <span class="fleet-val">{total_arms}</span>
       </div>
-      <div style="display:flex;justify-content:space-between;">
-        <span style="color:#64748b;font-size:.78rem;">Total Records</span>
-        <span style="color:#818cf8;font-weight:700;">{total_rows}</span>
+      <div class="fleet-row">
+        <span class="fleet-lbl">📋 Total Records</span>
+        <span class="fleet-val">{total_rows}</span>
       </div>
     </div>
     """, unsafe_allow_html=True)
@@ -323,13 +515,14 @@ with tab_diag:
             ("📅", "Age",         f"{int(selected_row['age_days'])}",   "Days","sc-green"),
         ]
         cards_html = '<div class="sensor-grid">'
-        for icon, label, val, unit, cls in sensors:
+        for i, (icon, label, val, unit, cls) in enumerate(sensors):
+            delay = i * 0.07
             cards_html += f"""
-            <div class="sensor-card {cls}">
-              <div class="sensor-icon">{icon}</div>
-              <div class="sensor-label">{label}</div>
-              <div class="sensor-value">{val}</div>
-              <div class="sensor-unit">{unit}</div>
+            <div class="sc {cls}" style="animation-delay:{delay:.2f}s">
+              <div class="sc-icon-wrap">{icon}</div>
+              <div class="sc-label">{label}</div>
+              <div class="sc-value">{val}</div>
+              <div class="sc-unit">{unit}</div>
             </div>"""
         cards_html += "</div>"
         st.markdown(cards_html, unsafe_allow_html=True)
@@ -375,7 +568,8 @@ with tab_diag:
                 # result banner
                 st.markdown(f"""
                 <div class="result-banner"
-                     style="background:{s_bg};border-color:{s_border};">
+                     style="background:{s_bg};border-color:{s_border};
+                            box-shadow:0 0 30px -4px {s_border}55;">
                   <div class="result-title" style="color:{s_color};">
                     {s_icon} &nbsp; {status}
                   </div>
@@ -384,15 +578,17 @@ with tab_diag:
                 """, unsafe_allow_html=True)
 
                 # probability gauge bar
-                fill_color = s_color
                 st.markdown(f"""
-                <div style="margin:4px 0 18px;">
-                  <div style="display:flex;justify-content:space-between;font-size:.72rem;color:#64748b;margin-bottom:4px;">
-                    <span>0%</span><span>Failure Risk</span><span>100%</span>
+                <div style="margin:4px 0 20px;">
+                  <div style="display:flex;justify-content:space-between;
+                              font-size:.68rem;color:#374151;margin-bottom:6px;">
+                    <span>0%</span>
+                    <span style="letter-spacing:.06em;text-transform:uppercase;font-weight:700;">Failure Risk</span>
+                    <span>100%</span>
                   </div>
                   <div class="prob-wrap">
                     <div class="prob-fill"
-                         style="width:{failure_prob*100:.1f}%;background:{fill_color};"></div>
+                         style="width:{failure_prob*100:.1f}%;--bar-color:{s_color};"></div>
                   </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -427,20 +623,17 @@ with tab_diag:
                 with col_b:
                     st.markdown('<div class="sec-head" style="margin-top:8px;">Breakdown</div>',
                                 unsafe_allow_html=True)
+                    icons_bd = {"Healthy": "✅", "Warning": "⚠️", "Critical": "🚨"}
                     for label, prob, color in [
                         ("Healthy",  healthy_prob,  "#22c55e"),
                         ("Warning",  warning_prob,  "#f59e0b"),
                         ("Critical", critical_prob, "#ef4444"),
                     ]:
+                        ico = icons_bd[label]
                         st.markdown(f"""
-                        <div style="display:flex;justify-content:space-between;
-                                    align-items:center;margin-bottom:10px;">
-                          <span style="color:#94a3b8;font-size:.85rem;">{label}</span>
-                          <span style="background:rgba(255,255,255,.06);
-                                       border:1px solid {color}44;
-                                       color:{color};font-weight:700;
-                                       border-radius:6px;padding:2px 12px;
-                                       font-size:.85rem;">{prob*100:.1f}%</span>
+                        <div class="bd-row" style="--rc:{color}">
+                          <span class="bd-label">{ico} {label}</span>
+                          <span class="bd-badge">{prob*100:.1f}%</span>
                         </div>
                         """, unsafe_allow_html=True)
 
@@ -459,20 +652,21 @@ with tab_analytics:
         # ── KPI row ──
         st.markdown('<div class="sec-head">Model KPIs</div>', unsafe_allow_html=True)
         k1, k2, k3, k4 = st.columns(4)
-        def kpi(col, val, label):
+        def kpi(col, val, label, icon=""):
             col.markdown(f"""
-            <div class="stat-card">
-              <div class="sv">{val}</div>
-              <div class="sl">{label}</div>
+            <div class="kpi-card">
+              <div style="font-size:1.4rem;margin-bottom:6px;">{icon}</div>
+              <div class="kpi-val">{val}</div>
+              <div class="kpi-lbl">{label}</div>
             </div>""", unsafe_allow_html=True)
 
-        kpi(k1, f"{acc*100:.1f}%", "Overall Accuracy")
-        kpi(k2, f"{report['Healthy']['f1-score']*100:.1f}%",  "Healthy F1")
-        kpi(k3, f"{report['Warning']['f1-score']*100:.1f}%",  "Warning F1")
-        kpi(k4, f"{report['Critical']['f1-score']*100:.1f}%", "Critical F1")
+        kpi(k1, f"{acc*100:.1f}%",                            "Overall Accuracy", "🎯")
+        kpi(k2, f"{report['Healthy']['f1-score']*100:.1f}%",  "Healthy F1",       "✅")
+        kpi(k3, f"{report['Warning']['f1-score']*100:.1f}%",  "Warning F1",       "⚠️")
+        kpi(k4, f"{report['Critical']['f1-score']*100:.1f}%", "Critical F1",      "🚨")
 
         # ── confusion matrix + report ──
-        st.markdown('<div class="sec-head">Confusion Matrix & Classification Report</div>',
+        st.markdown('<div class="sec-head">Confusion Matrix &amp; Classification Report</div>',
                     unsafe_allow_html=True)
         col_cm, col_rep = st.columns([1, 1])
 
@@ -578,7 +772,7 @@ with tab_history:
     if input_mode != "Select Robot ID" or arm_rows is None or arm_rows.empty:
         st.info("Switch to **Select Robot ID** mode in the sidebar to see historical records.")
     else:
-        st.markdown(f'<div class="sec-head">History for Arm {arm_id}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="sec-head">📜 History — Arm {arm_id}</div>', unsafe_allow_html=True)
         show_df = arm_rows.copy()
         if "start_date" in show_df.columns:
             show_df = show_df.sort_values("start_date", ascending=False)
@@ -586,7 +780,7 @@ with tab_history:
 
         # ── sensor trend ──
         if "start_date" in show_df.columns and len(show_df) > 1:
-            st.markdown('<div class="sec-head">Sensor Trends Over Time</div>',
+            st.markdown('<div class="sec-head">📈 Sensor Trends Over Time</div>',
                         unsafe_allow_html=True)
             trend_df = show_df.sort_values("start_date")
             sensor_cols = ["temperature", "vibration", "torque", "pressure", "volt", "rotate"]
